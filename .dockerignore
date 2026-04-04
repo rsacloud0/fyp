@@ -1,0 +1,23 @@
+Create `.dockerignore` in the same folder — this stops unnecessary files being copied into the container:
+```
+.git
+.gitignore
+README.md
+node_modules
+*.log
+
+**Step 6 — Update `.gitignore`**
+
+Make absolutely sure your API key never gets pushed to GitHub:
+```
+# Environment variables — NEVER commit these
+backend/.env
+.env
+
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# System files
+.DS_Store
+*.log
