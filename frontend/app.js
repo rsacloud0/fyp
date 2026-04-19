@@ -484,8 +484,7 @@ function skipGoal() {
 function cancelGoal() {
   const modal = document.getElementById('goalModal');
   if (modal) modal.style.display = 'none';
-  // Go to dashboard instead
-  window.location.href = 'dashboard.html';
+  // Just close - let user navigate manually if they want
 }
 
 async function createNewChatWithGoal(goal) {
