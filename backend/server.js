@@ -245,36 +245,42 @@ app.get('/health', (req, res) => {
 // ════════════════════════════════════════
 app.get('/api/youtube/search', authenticate, async (req, res) => {
   try {
-    const { query } = req.query;
+    const query = req.query.q || req.query.query;
     if (!query) {
-      return res.status(400).json({ error: 'Query is required' });
+      return res.status(400).json({ error: 'Query parameter q is required' });
     }
 
+    console.log('YouTube search for:', query, 'Key exists:', !!YOUTUBE_API_KEY);
+
     // Use YouTube Data API if key is configured
-    if (YOUTUBE_API_KEY) {
-      const ytRes = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`
-      );
-      const ytData = await ytRes.json();
-      
-      if (ytData.items && ytData.items.length > 0) {
-        const videos = ytData.items.map(item => ({
-          title: item.snippet.title,
-          channel: item.snippet.channelTitle,
-          videoId: item.id.videoId,
-          thumbnail: item.snippet.thumbnails?.medium?.url,
-          url: `https://www.youtube.com/watch?v=${item.id.videoId}`
-        }));
-        return res.json({ videos, fromApi: true });
+    if (YOUTUBE_API_KEY && YOUTUBE_API_KEY.length > 10) {
+      try {
+        const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`;
+        const ytRes = await fetch(ytUrl);
+        const ytData = await ytRes.json();
+        
+        console.log('YouTube API response:', ytData.error?.message || 'OK');
+        
+        if (ytData.items && ytData.items.length > 0) {
+          const videos = ytData.items.map(item => ({
+            title: item.snippet.title,
+            channel: item.snippet.channelTitle,
+            videoId: item.id.videoId,
+            thumbnail: item.snippet.thumbnails?.medium?.url,
+            url: `https://www.youtube.com/watch?v=${item.id.videoId}`
+          }));
+          return res.json({ videos, fromApi: true });
+        }
+      } catch (ytError) {
+        console.error('YouTube API error:', ytError.message);
       }
     }
 
-    // Fallback to scraping-free search (yt-nlp.info or similar)
-    // For demo, return search URL that frontend can use
+    // Fallback to search page
     res.json({
       videos: [],
       searchUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
-      message: 'Add YOUTUBE_API_KEY to .env for exact video links'
+      message: YOUTUBE_API_KEY ? 'No results found' : 'Add YOUTUBE_API_KEY to .env'
     });
   } catch (error) {
     console.error('YouTube search error:', error);
