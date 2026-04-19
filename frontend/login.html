@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThinkIA — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-container {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(18,16,14,0.12);
+  animation: fadeUp 0.5s ease;
+}
+
+.login-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.login-title {
+  font-family: 'Lora', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.login-title-pip {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 4px;
+}
+
+h2 {
+  font-family: 'Lora', serif;
+  font-size: 1.4rem;
+  text-align: center;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--paper);
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 8px;
+}
+
+.btn:hover {
+  background: var(--accent);
+}
+
+.guest-info {
+  background: var(--cream);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 20px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.guest-info strong {
+  color: var(--ink);
+}
+
+.error-msg {
+  background: var(--white);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 18px;
+  display: none;
+}
+
+.back-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.82rem;
+}
+
+.back-link a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.back-link a:hover {
+  color: var(--accent);
+}
+</style>
+</head>
+<body class="login-page">
+
+<div class="login-container">
+  <div class="login-header">
+    <span class="login-title">ThinkIA<span class="login-title-pip"></span></span>
+    <button class="theme-toggle-sm" id="themeToggle" title="Toggle theme">
+      <span class="toggle-icon">☀️</span>
+    </button>
+  </div>
+  
+  <div id="errorMsg" class="error-msg"></div>
+
+  <h2>Welcome to ThinkIA</h2>
+  <p class="subtitle">Your Intelligence Amplifier. Sign in to access your thinking sessions.</p>
+  
+  <div class="guest-info">
+    <strong>Guest Access:</strong> Enter the credentials below to access the demo account.
+  </div>
+
+  <div class="form-group">
+    <label for="loginEmail">Email</label>
+    <input type="email" id="loginEmail" placeholder="guest@thinkia.com" value="guest@thinkia.com">
+  </div>
+  
+  <div class="form-group">
+    <label for="loginPassword">Password</label>
+    <input type="password" id="loginPassword" placeholder="Enter your password" value="guest123">
+  </div>
+  
+  <button class="btn" onclick="handleLogin()">Sign In</button>
+
+  <p class="back-link login-link" style="display:none" id="guestContinue">
+    <a href="#" onclick="continueAsGuest();return false;">Continue as Guest (no account needed)</a>
+  </p>
+
+  <div id="registerSection" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:12px;">Create an account to save your chats permanently:</p>
+    <div class="form-group">
+      <label for="regName">Name</label>
+      <input type="text" id="regName" placeholder="Your name">
+    </div>
+    <button class="btn" onclick="handleRegister()">Create Account</button>
+  </div>
+
+  <p class="back-link">
+    <a href="about-us.html">← Back to Home</a>
+  </p>
+</div>
+
+<script>
+const API_BASE = '';
+
+// ── THEME TOGGLE ──
+const html = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+
+function setTheme(theme) {
+  html.setAttribute('data-theme', theme);
+  localStorage.setItem('thinkia-theme', theme);
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const icon = document.querySelector('.toggle-icon');
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  icon.textContent = isDark ? '🌙' : '☀️';
+}
+
+function toggleTheme() {
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  setTheme(isDark ? 'light' : 'dark');
+}
+
+// Restore saved preference
+if (localStorage.getItem('thinkia-theme') === 'dark') {
+  html.setAttribute('data-theme', 'dark');
+}
+updateThemeIcon();
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', toggleTheme);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  
+  if (!email || !password) {
+    showError('Please enter both email and password');
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      showError(data.error || 'Login failed. Please check your credentials.');
+      return;
+    }
+    
+    localStorage.setItem('thinkia_user', JSON.stringify(data.user));
+    localStorage.setItem('thinkia_token', data.token);
+    localStorage.removeItem('thinkia_state');
+    window.location.href = 'index.html';
+    
+  } catch (err) {
+    showError('Connection error. Please make sure the backend is running.');
+    console.error(err);
+  }
+}
+
+function generateDeviceId() {
+  let deviceId = localStorage.getItem('thinkia_device_id');
+  if (!deviceId) {
+    deviceId = 'device_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem('thinkia_device_id', deviceId);
+  }
+  return deviceId;
+}
+
+async function handleGuestLogin() {
+  const deviceId = generateDeviceId();
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/guest-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device_id: deviceId })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showError(data.error || 'Guest login failed.');
+      return;
+    }
+
+    localStorage.setItem('thinkia_user', JSON.stringify(data.user));
+    localStorage.setItem('thinkia_token', data.token);
+    localStorage.removeItem('thinkia_state');
+    window.location.href = 'index.html';
+
+  } catch (err) {
+    showError('Connection error. Please make sure the backend is running.');
+    console.error(err);
+  }
+}
+
+async function handleRegister() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const name = document.getElementById('regName')?.value.trim();
+  const deviceId = localStorage.getItem('thinkia_device_id');
+
+  if (!email || !password) {
+    showError('Please enter email and password');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name, device_id: deviceId })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showError(data.error || 'Registration failed.');
+      return;
+    }
+
+    localStorage.setItem('thinkia_user', JSON.stringify(data.user));
+    localStorage.setItem('thinkia_token', data.token);
+    localStorage.removeItem('thinkia_state');
+    window.location.href = 'index.html';
+
+  } catch (err) {
+    showError('Connection error. Please make sure the backend is running.');
+    console.error(err);
+  }
+}
+
+function continueAsGuest() {
+  handleGuestLogin();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    handleLogin();
+  }
+});
+
+if (localStorage.getItem('thinkia_user') && localStorage.getItem('thinkia_token')) {
+  window.location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>
