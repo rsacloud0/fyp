@@ -782,31 +782,11 @@ function updateSources(data) {
   saveState();
 }
 
-async function searchYouTube(title, channel) {
+function searchYouTube(title, channel) {
   const query = channel ? `${title} ${channel}`.trim() : title;
-  
-  try {
-    // Try API first for exact links
-    const res = await fetch(buildApiUrl(`/api/youtube/search?q=${encodeURIComponent(query)}`), {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
-    const data = await res.json();
-    
-    if (data.videos && data.videos.length > 0) {
-      // Open first exact video
-      window.open(data.videos[0].url, '_blank');
-      return;
-    }
-    
-    // Fallback to search
-    if (data.searchUrl) {
-      window.open(data.searchUrl, '_blank');
-    }
-  } catch (e) {
-    // Fallback to regular search
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-    window.open(url, '_blank');
-  }
+  // Direct to YouTube search - works from anywhere (Cloudflare or local)
+  const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+  window.open(url, '_blank');
 }
 
 function searchBook(title, author) {
@@ -817,7 +797,7 @@ function searchBook(title, author) {
 
 function searchArticle(title, source) {
   const query = title + (source ? ' ' + source : '');
-  const url = `https://www.google.com/search?q=${encodeURIComponent(query + ' article')}`;
+  const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
   window.open(url, '_blank');
 }
 
