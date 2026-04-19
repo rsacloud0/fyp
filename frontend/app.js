@@ -481,6 +481,13 @@ function skipGoal() {
   createNewChatWithoutGoal();
 }
 
+function cancelGoal() {
+  const modal = document.getElementById('goalModal');
+  if (modal) modal.style.display = 'none';
+  // Go to dashboard instead
+  window.location.href = 'dashboard.html';
+}
+
 async function createNewChatWithGoal(goal) {
   // 🔧 FIX: Verify token is still valid before creating session
   if (authToken) {
@@ -1423,9 +1430,17 @@ function renderSessionSources() {
         card.className = 'resource-card';
         let content = `<div class="rc-title">${escHtml(r.title)}</div><div class="rc-sub">${escHtml(r.author || r.channel || r.source || '')}</div>`;
 
-        if (r.type === 'video' && (r.channel || r.title)) {
+        if (r.type === 'video') {
           card.innerHTML = `<div class="rc-type video">▶️ Video</div>${content}`;
           card.onclick = () => searchYouTube(r.title, r.channel);
+          card.style.cursor = 'pointer';
+        } else if (r.type === 'book') {
+          card.innerHTML = `<div class="rc-type book">📚 Book</div>${content}`;
+          card.onclick = () => searchBook(r.title, r.author);
+          card.style.cursor = 'pointer';
+        } else if (r.type === 'article') {
+          card.innerHTML = `<div class="rc-type article">📄 Article</div>${content}`;
+          card.onclick = () => searchArticle(r.title, r.source);
           card.style.cursor = 'pointer';
         } else {
           card.innerHTML = `<div class="rc-type ${r.type}">${r.type === 'book' ? '📚 Book' : r.type === 'article' ? '📄 Article' : '▶️ Video'}</div>${content}`;
