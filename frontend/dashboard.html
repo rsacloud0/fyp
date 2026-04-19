@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThinkIA — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="logo" style="text-decoration:none;">
+    <span class="logo-word">ThinkIA</span>
+    <div class="logo-pip"></div>
+  </a>
+  <div class="hdr-center">
+    <div class="bloom-badge" id="bloomBadge" style="display:none"></div>
+  </div>
+  <div class="hdr-right">
+    <button class="hdr-btn theme-toggle" id="themeToggle" title="Toggle theme">
+      <span class="toggle-icon-sm">☀️</span>
+    </button>
+    <a href="index.html" class="hdr-btn">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Back to Chat
+    </a>
+    <button class="hdr-btn logout-btn" id="logoutBtn" onclick="handleLogout()" title="Logout">
+      <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5z"/></svg>
+      Logout
+    </button>
+    <div class="av-chip" onclick="location.href='index.html'">G</div>
+  </div>
+</header>
+
+<!-- DASHBOARD -->
+<div class="dashboard-page">
+  <div class="dash-container">
+    <div class="dash-hero">
+      <div class="dash-av" id="dashAv">G</div>
+      <div class="dash-name" id="dashName">Guest</div>
+      <div class="dash-joined" id="dashJoined">ThinkIA Member</div>
+      <div class="dash-stats">
+        <div class="ds"><div class="ds-val" id="dsSessions">0</div><div class="ds-lbl">Chats</div></div>
+        <div class="ds"><div class="ds-val" id="dsQuizAvg">—</div><div class="ds-lbl">Quiz Avg</div></div>
+        <div class="ds"><div class="ds-val" id="dsMsgs">0</div><div class="ds-lbl">Messages</div></div>
+      </div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" onclick="switchTab('overview',this)">Overview</button>
+      <button class="dash-tab" onclick="switchTab('goals',this)">Goals</button>
+      <button class="dash-tab" onclick="switchTab('chats',this)">Chats</button>
+      <button class="dash-tab" onclick="switchTab('bloom',this)">Bloom's</button>
+      <button class="dash-tab" onclick="switchTab('quizzes',this)">Quizzes</button>
+      <button class="dash-tab" onclick="switchTab('resources',this)">Resources</button>
+    </div>
+    <button class="refresh-btn" onclick="refreshDashboardRealtimeData()">↻ Refresh Data</button>
+
+    <div class="dash-tab-content active" id="tab-overview">
+      <div class="dash-sec">
+        <h4>Thinking Skills Radar</h4>
+        <div class="radar-wrap"><canvas id="radarCanvas" width="250" height="190"></canvas></div>
+      </div>
+      <div class="dash-sec">
+        <h4>Core Metrics</h4>
+        <div id="dashMetrics"></div>
+      </div>
+      <div class="dash-sec">
+        <h4>Activity (last 7 days)</h4>
+        <div class="streak-row" id="streakRow"></div>
+        <p style="font-size:0.7rem;color:var(--muted);margin-top:7px;" id="streakLbl">—</p>
+      </div>
+      <div class="dash-sec">
+        <h4>Concepts Snapshot</h4>
+        <div id="overviewConcepts"><p class="empty-note" style="font-size:0.76rem">Concepts will appear here as you chat.</p></div>
+      </div>
+      <div class="dash-sec">
+        <h4>Recent Resources</h4>
+        <div id="overviewResources"><p class="empty-note" style="font-size:0.76rem">Recommended resources will appear here as you chat.</p></div>
+      </div>
+    </div>
+
+    <div class="dash-tab-content" id="tab-goals">
+      <div class="dash-sec">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h4 style="margin:0;">Your Goals</h4>
+          <button class="new-chat-btn" style="width:auto;padding:8px 14px;font-size:0.76rem;" onclick="startNewChatFromDashboard()">+ New Goal</button>
+        </div>
+        <p style="font-size:0.76rem;color:var(--muted);margin-bottom:14px;line-height:1.5;">Click on any goal to continue that conversation.</p>
+        <div id="goalsList">
+          <p class="empty-note" style="font-size:0.76rem">No goals yet. Start a new chat to set your first goal!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-tab-content" id="tab-chats">
+      <div class="dash-sec">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h4 style="margin:0;">Your Conversations</h4>
+          <button class="new-chat-btn" style="width:auto;padding:8px 14px;font-size:0.76rem;" onclick="startNewChatFromDashboard()">+ New Chat</button>
+        </div>
+        <div id="chatSessionsList"><p class="empty-note" style="font-size:0.76rem">No conversations yet. Start chatting!</p></div>
+      </div>
+    </div>
+
+    <div class="dash-tab-content" id="tab-bloom">
+      <div class="dash-sec">
+        <h4>Bloom's Taxonomy Journey</h4>
+        <p style="font-size:0.76rem;color:var(--muted);line-height:1.55;margin-bottom:14px;">Your questions are classified by cognitive level. The goal is to progress from remembering facts up to creating new ideas.</p>
+        <div class="bloom-track">
+          <div class="bloom-level" id="bl-1" style="color:var(--bloom1)"><div class="bl-dot" style="background:var(--bloom1)"></div><div class="bl-info"><div class="bl-name">Remember</div><div class="bl-desc">Recall facts &amp; basics</div></div><span class="bl-count" id="blc-1">0</span></div>
+          <div class="bloom-level" id="bl-2" style="color:var(--bloom2)"><div class="bl-dot" style="background:var(--bloom2)"></div><div class="bl-info"><div class="bl-name">Understand</div><div class="bl-desc">Explain ideas</div></div><span class="bl-count" id="blc-2">0</span></div>
+          <div class="bloom-level" id="bl-3" style="color:var(--bloom3)"><div class="bl-dot" style="background:var(--bloom3)"></div><div class="bl-info"><div class="bl-name">Apply</div><div class="bl-desc">Use in new contexts</div></div><span class="bl-count" id="blc-3">0</span></div>
+          <div class="bloom-level" id="bl-4" style="color:var(--bloom4)"><div class="bl-dot" style="background:var(--bloom4)"></div><div class="bl-info"><div class="bl-name">Analyse</div><div class="bl-desc">Draw connections</div></div><span class="bl-count" id="blc-4">0</span></div>
+          <div class="bloom-level" id="bl-5" style="color:var(--bloom5)"><div class="bl-dot" style="background:var(--bloom5)"></div><div class="bl-info"><div class="bl-name">Evaluate</div><div class="bl-desc">Make judgements</div></div><span class="bl-count" id="blc-5">0</span></div>
+          <div class="bloom-level" id="bl-6" style="color:var(--bloom6)"><div class="bl-dot" style="background:var(--bloom6)"></div><div class="bl-info"><div class="bl-name">Create</div><div class="bl-desc">Produce new ideas</div></div><span class="bl-count" id="blc-6">0</span></div>
+        </div>
+      </div>
+      <div class="dash-sec">
+        <h4>Level Distribution</h4>
+        <canvas id="bloomChart" width="320" height="120"></canvas>
+      </div>
+    </div>
+
+    <div class="dash-tab-content" id="tab-quizzes">
+      <div class="dash-sec">
+        <h4>Quiz History</h4>
+        <div id="dashQuizHist"><p class="empty-note" style="font-size:0.76rem">No quizzes taken yet. Take a quiz during your chat sessions!</p></div>
+      </div>
+    </div>
+
+    <div class="dash-tab-content" id="tab-resources">
+      <div class="dash-sec">
+        <h4>Concepts Explored</h4>
+        <div id="dashConceptChips"><p class="empty-note" style="font-size:0.76rem">Concepts will appear as you chat.</p></div>
+      </div>
+      <div class="dash-resource-grid">
+        <div class="dash-sec">
+          <h4>Recommended Books</h4>
+          <div id="dashBooks"><p class="empty-note" style="font-size:0.76rem">Book recommendations will appear here.</p></div>
+        </div>
+        <div class="dash-sec">
+          <h4>Recommended Videos</h4>
+          <div id="dashVideos"><p class="empty-note" style="font-size:0.76rem">Video recommendations will appear here.</p></div>
+        </div>
+        <div class="dash-sec">
+          <h4>Recommended Articles</h4>
+          <div id="dashArticles"><p class="empty-note" style="font-size:0.76rem">Article recommendations will appear here.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ OVERLAY -->
+<div id="quizOverlay" style="display:none;position:fixed;inset:0;background:rgba(18,16,14,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;"></div>
+
+<script src="app.js"></script>
+<script>
+const html = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+
+function setTheme(theme) {
+  html.setAttribute('data-theme', theme);
+  localStorage.setItem('thinkia-theme', theme);
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const icon = document.querySelector('.toggle-icon-sm');
+  if (icon) {
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    icon.textContent = isDark ? '🌙' : '☀️';
+  }
+}
+
+function toggleTheme() {
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  setTheme(isDark ? 'light' : 'dark');
+}
+
+// Restore saved preference
+if (localStorage.getItem('thinkia-theme') === 'dark') {
+  html.setAttribute('data-theme', 'dark');
+}
+updateThemeIcon();
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', toggleTheme);
+}
+
+// Basic dashboard - just rely on app.js initialization
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Dashboard loaded');
+});
+</script>
+</body>
+</html>
