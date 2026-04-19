@@ -10,10 +10,26 @@ const STATE_STORAGE_KEY = 'thinkia_state';
 const DEVICE_ID_KEY = 'thinkia_device_id';
 const DASHBOARD_REFRESH_INTERVAL_MS = 10000;
 
+// Configurable API URL (for production deployment)
+// Render provides this as an environment variable, or set manually
+const API_BASE_URL = process.env?.API_BASE_URL || 
+  'https://thinkia-backend.onrender.com'; // Replace with your Render URL
+
 function getApiBase() {
   if (typeof window === 'undefined') return '';
   const host = window.location.hostname;
-  return (host === 'localhost' || host === '127.0.0.1') ? 'http://localhost:3001' : '';
+  
+  // Local development
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'http://localhost:3001';
+  }
+  
+  // Production - use configured URL or try to construct
+  if (API_BASE_URL && API_BASE_URL.startsWith('http')) {
+    return API_BASE_URL;
+  }
+  
+  return ''; // Fallback - will use relative URLs
 }
 
 function buildApiUrl(endpoint) {
