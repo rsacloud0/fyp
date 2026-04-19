@@ -787,7 +787,7 @@ async function searchYouTube(title, channel) {
   
   try {
     // Try API first for exact links
-    const res = await fetch(buildApiUrl(`/api/youtube/search?${encodeURIComponent(query)}`), {
+    const res = await fetch(buildApiUrl(`/api/youtube/search?q=${encodeURIComponent(query)}`), {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const data = await res.json();
