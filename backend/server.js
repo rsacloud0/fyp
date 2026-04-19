@@ -12,6 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'thinkia_secret_key_2024_change_in_
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const DB_NAME = process.env.DB_NAME || 'thinkia';
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
 
 let db;
 let users, sessions, messages, metrics, goals;
@@ -86,10 +87,20 @@ app.use(cors({
 app.use(express.json({ limit: '2mb' }));
 
 app.use((req, res, next) => {
+  // Basic security headers
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.removeHeader('X-Powered-By');
+  
+  // Cloudflare security headers (for when deployed behind Cloudflare)
+  res.setHeader('X-UA-Compatible', 'IE=Edge');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  
+  // Content Security Policy (helps prevent XSS/injection)
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://openrouter.ai https://youtube.googleapis.com");
+  
   next();
 });
 
@@ -227,6 +238,48 @@ async function trackActiveDay(userIdObj) {
 // ════════════════════════════════════════
 app.get('/health', (req, res) => {
   res.json({ status: 'ThinkIA backend running', timestamp: new Date().toISOString() });
+});
+
+// ════════════════════════════════════════
+// YOUTUBE API - Search and get exact video links
+// ════════════════════════════════════════
+app.get('/api/youtube/search', authenticate, async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ error: 'Query is required' });
+    }
+
+    // Use YouTube Data API if key is configured
+    if (YOUTUBE_API_KEY) {
+      const ytRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`
+      );
+      const ytData = await ytRes.json();
+      
+      if (ytData.items && ytData.items.length > 0) {
+        const videos = ytData.items.map(item => ({
+          title: item.snippet.title,
+          channel: item.snippet.channelTitle,
+          videoId: item.id.videoId,
+          thumbnail: item.snippet.thumbnails?.medium?.url,
+          url: `https://www.youtube.com/watch?v=${item.id.videoId}`
+        }));
+        return res.json({ videos, fromApi: true });
+      }
+    }
+
+    // Fallback to scraping-free search (yt-nlp.info or similar)
+    // For demo, return search URL that frontend can use
+    res.json({
+      videos: [],
+      searchUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
+      message: 'Add YOUTUBE_API_KEY to .env for exact video links'
+    });
+  } catch (error) {
+    console.error('YouTube search error:', error);
+    res.status(500).json({ error: 'Search failed' });
+  }
 });
 
 // 🔧 FIX: Add token verification endpoint for frontend auth checks

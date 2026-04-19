@@ -1260,6 +1260,31 @@ body.about-page{
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 
+/* ── SETTINGS MODAL ── */
+.settings-modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,16,14,0.6);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.settings-modal{background:var(--white);border-radius:18px;max-width:420px;width:100%;max-height:85vh;overflow:auto;box-shadow:0 12px 48px rgba(18,16,14,0.2);animation:fadeUp 0.3s ease;}
+.settings-modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border);}
+.settings-modal-header h2{font-family:'Lora',serif;font-size:1.3rem;color:var(--ink);margin:0;}
+.settings-modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);padding:4px;}
+.settings-modal-close:hover{color:var(--ink);}
+.settings-modal-body{padding:20px 24px;}
+.settings-section{margin-bottom:24px;}
+.settings-section:last-child{margin-bottom:0;}
+.settings-section h3{font-size:0.9rem;font-weight:600;color:var(--ink);margin:0 0 6px 0;}
+.settings-section p{font-size:0.8rem;color:var(--muted);margin:0 0 10px 0;}
+.settings-section select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:0.9rem;background:var(--paper);color:var(--ink);}
+.settings-section select:focus{outline:none;border-color:var(--accent);}
+.settings-section .form-group{margin-bottom:12px;}
+.settings-section .form-group label{display:block;font-size:0.8rem;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.settings-section .form-group input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:0.9rem;background:var(--paper);color:var(--ink);}
+.settings-section .form-group input:focus{outline:none;border-color:var(--accent);}
+.toggle-label{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.toggle-label input{width:18px;height:18px;accent-color:var(--accent);}
+.toggle-label span{font-size:0.85rem;color:var(--ink);}
+.settings-modal-footer{padding:16px 24px 24px;text-align:right;}
+.settings-modal-footer .btn-primary{background:var(--ink);color:var(--white);border:none;padding:12px 24px;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;}
+.settings-modal-footer .btn-primary:hover{background:var(--accent);}
+
 @media(max-width:768px){
   .about-header-content{padding:12px 16px;}
   .about-nav{display:none;}

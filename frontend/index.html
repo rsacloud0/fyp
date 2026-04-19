@@ -34,6 +34,10 @@
       <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm14 3a3 3 0 100-6 3 3 0 000 6z"/></svg>
       Dashboard
     </a>
+    <button class="hdr-btn" id="settingsBtn" onclick="showSettings()" title="Settings">
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      Settings
+    </button>
     <button class="hdr-btn logout-btn" id="logoutBtn" onclick="handleLogout()" title="Logout">
       <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
       Logout
@@ -173,6 +177,57 @@
 
 <!-- QUIZ OVERLAY -->
 <div id="quizOverlay" style="display:none;position:fixed;inset:0;background:rgba(18,16,14,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="settings-modal-overlay" id="settingsModal">
+  <div class="settings-modal">
+    <div class="settings-modal-header">
+      <h2>Settings</h2>
+      <button class="settings-modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="settings-modal-body">
+      <div class="settings-section">
+        <h3>Quiz Frequency</h3>
+        <p>How often should quiz checkpoints appear?</p>
+        <select id="quizFrequency" onchange="saveSettings()">
+          <option value="3">Every 3 messages</option>
+          <option value="5">Every 5 messages</option>
+          <option value="6" selected>Every 6 messages (default)</option>
+          <option value="10">Every 10 messages</option>
+          <option value="0">Never</option>
+        </select>
+      </div>
+      <div class="settings-section">
+        <h3>Notification Frequency</h3>
+        <p>How often should session notifications appear?</p>
+        <select id="notifFrequency" onchange="saveSettings()">
+          <option value="10">Every 10 minutes</option>
+          <option value="20" selected>Every 20 minutes (default)</option>
+          <option value="30">Every 30 minutes</option>
+          <option value="0">Never</option>
+        </select>
+      </div>
+      <div class="settings-section">
+        <h3>Personalized Notifications</h3>
+        <label class="toggle-label">
+          <input type="checkbox" id="personalizedNotif" onchange="saveSettings()">
+          <span>Enable personalized tips based on your conversation</span>
+        </label>
+      </div>
+      <div class="settings-section" id="accountSection" style="display:none;">
+        <h3>Account Settings</h3>
+        <div class="form-group">
+          <label for="displayName">Display Name</label>
+          <input type="text" id="displayName" placeholder="Your name">
+        </div>
+        <button class="btn" onclick="updateAccount()">Update Profile</button>
+      </div>
+    </div>
+    <div class="settings-modal-footer">
+      <button class="btn-primary" onclick="closeSettings()">Done</button>
+    </div>
+  </div>
+</div>
 
 <script src="app.js"></script>
 <script>

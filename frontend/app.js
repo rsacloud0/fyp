@@ -1,3 +1,8 @@
+// Browser polyfill
+if (typeof window !== 'undefined' && !window.process) {
+  window.process = { env: { NODE_ENV: 'development' } };
+}
+
 // ════════════════════════════════════════
 // CONFIG — points to your backend
 // ════════════════════════════════════════
@@ -336,6 +341,106 @@ function showNotifications() {
 }
 
 // ════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════
+const SETTINGS_KEY = 'thinkia_settings';
+
+const defaultSettings = {
+  quizFrequency: 6,
+  notifFrequency: 20,
+  personalizedNotif: true
+};
+
+function loadSettings() {
+  const saved = localStorage.getItem(SETTINGS_KEY);
+  if (saved) {
+    try { return { ...defaultSettings, ...JSON.parse(saved) }; }
+    catch { return { ...defaultSettings }; }
+  }
+  return { ...defaultSettings };
+}
+
+function saveSettings() {
+  const settings = {
+    quizFrequency: parseInt(document.getElementById('quizFrequency')?.value || 6),
+    notifFrequency: parseInt(document.getElementById('notifFrequency')?.value || 20),
+    personalizedNotif: document.getElementById('personalizedNotif')?.checked ?? true
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  applySettings(settings);
+}
+
+function applySettings(settings) {
+  // Apply quiz frequency
+  window.QUIZ_FREQUENCY = settings.quizFrequency;
+  
+  // Reconfigure notification timers
+  if (window.notificationTimers) {
+    window.notificationTimers.forEach(t => clearTimeout(t));
+    startNotificationTimers();
+  }
+}
+
+function showSettings() {
+  const settings = loadSettings();
+  const modal = document.getElementById('settingsModal');
+  if (!modal) return;
+  
+  if (document.getElementById('quizFrequency')) {
+    document.getElementById('quizFrequency').value = settings.quizFrequency;
+  }
+  if (document.getElementById('notifFrequency')) {
+    document.getElementById('notifFrequency').value = settings.notifFrequency;
+  }
+  if (document.getElementById('personalizedNotif')) {
+    document.getElementById('personalizedNotif').checked = settings.personalizedNotif;
+  }
+  
+  // Show account section if logged in (not guest)
+  const user = JSON.parse(localStorage.getItem('thinkia_user') || '{}');
+  const accountSection = document.getElementById('accountSection');
+  if (accountSection && !user.is_guest) {
+    accountSection.style.display = 'block';
+    if (document.getElementById('displayName')) {
+      document.getElementById('displayName').value = user.name || '';
+    }
+  }
+  
+  modal.style.display = 'flex';
+}
+
+function closeSettings() {
+  const modal = document.getElementById('settingsModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function updateAccount() {
+  const name = document.getElementById('displayName')?.value.trim();
+  if (!name) return;
+  const user = JSON.parse(localStorage.getItem('thinkia_user') || '{}');
+  user.name = name;
+  localStorage.setItem('thinkia_user', JSON.stringify(user));
+  profile.name = name;
+  if (document.getElementById('uiName')) document.getElementById('uiName').textContent = name;
+  if (document.getElementById('uiAvatar')) document.getElementById('uiAvatar').textContent = name[0].toUpperCase();
+  if (document.getElementById('headerAv')) document.getElementById('headerAv').textContent = name[0].toUpperCase();
+  if (document.getElementById('dashAv')) document.getElementById('dashAv').textContent = name[0].toUpperCase();
+  if (document.getElementById('dashName')) document.getElementById('dashName').textContent = name;
+  if (document.getElementById('uiAv')) document.getElementById('uiAv').textContent = name[0].toUpperCase();
+  alert('Profile updated!');
+}
+
+// Initialize settings on load
+function initSettings() {
+  const settings = loadSettings();
+  window.QUIZ_FREQUENCY = settings.quizFrequency;
+  window.NOTIF_FREQUENCY = settings.notifFrequency;
+  window.PERSONALIZED_NOTIF = settings.personalizedNotif;
+}
+
+initSettings();
+
+// ════════════════════════════════════════
 // GOAL MODAL
 // ════════════════════════════════════════
 function promptGoalAndStartChat() {
@@ -588,9 +693,16 @@ function handleLogout() {
 // SESSION NOTIFICATIONS
 // ════════════════════════════════════════
 function startNotificationTimers() {
-  setTimeout(() => addSessionNotification('info', '🧠 10 min milestone', 'You\'re on a roll! Keep exploring — depth comes from sustained inquiry.'), 10 * 60 * 1000);
-  setTimeout(() => addSessionNotification('warn', '⏱ Time for a break!', 'You\'ve been thinking for 20 minutes. Step away and let ideas settle.'), 20 * 60 * 1000);
-  setTimeout(() => addSessionNotification('warn', '⏱ Extended session', '35 minutes active. Consider switching to offline reflection.'), 35 * 60 * 1000);
+  window.notificationTimers = [];
+  if (!window.PERSONALIZED_NOTIF) return;
+  
+  const notifFreq = window.NOTIF_FREQUENCY || 20;
+  if (notifFreq <= 0) return;
+  
+  // Milestone notifications based on frequency setting
+  window.notificationTimers.push(setTimeout(() => addSessionNotification('info', '🧠 ' + notifFreq + ' min milestone', 'You\'re on a roll! Keep exploring — depth comes from sustained inquiry.'), notifFreq * 60 * 1000));
+  window.notificationTimers.push(setTimeout(() => addSessionNotification('warn', '⏱ Time for a break!', 'You\'ve been thinking for ' + (notifFreq * 2) + ' minutes. Step away and let ideas settle.'), notifFreq * 2 * 60 * 1000));
+  window.notificationTimers.push(setTimeout(() => addSessionNotification('warn', '⏱ Extended session', (notifFreq * 3) + ' minutes active. Consider switching to offline reflection.'), notifFreq * 3 * 60 * 1000));
 }
 
 function addSessionNotification(type, title, msg) {
@@ -664,9 +776,42 @@ function updateSources(data) {
   saveState();
 }
 
-function searchYouTube(title, channel) {
+async function searchYouTube(title, channel) {
   const query = channel ? `${title} ${channel}`.trim() : title;
-  const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+  
+  try {
+    // Try API first for exact links
+    const res = await fetch(buildApiUrl(`/api/youtube/search?${encodeURIComponent(query)}`), {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    
+    if (data.videos && data.videos.length > 0) {
+      // Open first exact video
+      window.open(data.videos[0].url, '_blank');
+      return;
+    }
+    
+    // Fallback to search
+    if (data.searchUrl) {
+      window.open(data.searchUrl, '_blank');
+    }
+  } catch (e) {
+    // Fallback to regular search
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    window.open(url, '_blank');
+  }
+}
+
+function searchBook(title, author) {
+  const query = title + (author ? ' ' + author : '');
+  const url = `https://www.google.com/search?q=${encodeURIComponent(query + ' book')}`;
+  window.open(url, '_blank');
+}
+
+function searchArticle(title, source) {
+  const query = title + (source ? ' ' + source : '');
+  const url = `https://www.google.com/search?q=${encodeURIComponent(query + ' article')}`;
   window.open(url, '_blank');
 }
 
@@ -1477,7 +1622,8 @@ async function sendMessage() {
       generateChatTitle();
     }
 
-    if (msgCount > 0 && msgCount % 6 === 0) {
+    const quizFreq = window.QUIZ_FREQUENCY || 6;
+    if (quizFreq > 0 && msgCount > 0 && msgCount % quizFreq === 0) {
       setTimeout(() => triggerQuiz('mid'), 1200);
     }
 
